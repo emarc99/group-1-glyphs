@@ -1,6 +1,8 @@
-# 🎨 SVG Glyph
+# 🎨 SVG Glyphs
 
 **An on-chain generative art NFT project built with Arbitrum Stylus.**
+
+🔗 **Live on Arbitrum Sepolia:** [`0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED`](https://sepolia.arbiscan.io/address/0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED)
 
 ---
 
@@ -22,12 +24,12 @@ This approach demonstrates the high performance and low cost of Stylus, which ma
 
 ## 🛠️ Tech Stack
 
-* **Blockchain:** [Arbitrum](https://arbitrum.io/)
+* **Blockchain:** [Arbitrum Sepolia](https://arbitrum.io/) (Testnet)
 * **Smart Contracts:** [Arbitrum Stylus](https://docs.arbitrum.io/stylus/stylus-gentle-introduction) (Rust SDK)
 * **NFT Standard:** ERC-721
-* **Development Framework:** [Foundry](https://book.getfoundry.sh/) or [Hardhat](https://hardhat.org/)
-* **Frontend:** [Vite](https://vitejs.dev/) + [React](https://reactjs.org/) / [Vue](https://vuejs.org/)
-* **Web3 Library:** [Ethers.js](https://ethers.org/) or [Viem](https://viem.sh/)
+* **Frontend:** [Vite](https://vitejs.dev/) + [React 19](https://reactjs.org/) + TypeScript
+* **Web3 Library:** [Ethers.js v6](https://ethers.org/)
+* **Contract Address:** `0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED`
 
 ---
 
@@ -63,7 +65,11 @@ To get a local copy up and running, follow these simple steps.
     ```
 4.  **Build the smart contract**
     ```sh
-    cd ../contracts && forge build
+    cd ../contracts && cargo stylus check
+    ```
+5.  **Run the frontend**
+    ```sh
+    cd ../frontend && npm run dev
     ```
 
 ---
@@ -71,33 +77,84 @@ To get a local copy up and running, follow these simple steps.
 ## 🏗️ Project Structure
 
 ```
-svg-glyph/
+group-1-glyphs/
 ├── contracts/          # Arbitrum Stylus smart contract (Rust)
 │   ├── src/
-│   │   ├── lib.rs
-│   │   └── glyph.rs
+│   │   ├── lib.rs          # Main contract logic
+│   │   ├── generator.rs    # SVG generation algorithm
+│   │   ├── base64.rs       # Base64 encoding utilities
+│   │   └── main.rs         # Entry point
 │   ├── Cargo.toml
-│   └── foundry.toml
-├── frontend/           # React/Vite frontend
+│   └── rust-toolchain.toml
+├── frontend/           # React + TypeScript frontend
 │   ├── src/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── utils/
-│   │   └── App.jsx
+│   │   ├── components/     # React components
+│   │   ├── hooks/          # Custom hooks (useWallet)
+│   │   ├── utils/          # Contract utilities
+│   │   └── App.tsx         # Main app component
 │   ├── package.json
-│   └── vite.config.js
-|
+│   └── vite.config.ts
 ├── .gitignore
 └── README.md
 ```
 
-## 📊 Interacting with the Contract
+## 📊 Using the DApp
 
-### Using Cast (Foundry)
+### Deployed Contract
+
+**Network:** Arbitrum Sepolia
+**Contract Address:** `0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED`
+**Block Explorer:** [View on Arbiscan](https://sepolia.arbiscan.io/address/0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED)
+
+### Frontend Features
+
+✅ **Wallet Connection**
+- Automatic Arbitrum Sepolia network switching
+- MetaMask integration
+- Network mismatch warnings
+
+✅ **NFT Minting**
+- Free minting (gas only)
+- Real-time transaction tracking
+- Block explorer link after mint
+- Displays minted token ID
+
+✅ **Auto-Fetch Gallery**
+- Automatically loads all user's NFTs on wallet connect
+- Uses Transfer event indexing for efficient fetching
+- Displays on-chain generated SVG art
+- Download SVG functionality
+
+### Interacting with the Contract (CLI)
 
 ```sh
+# Mint a Glyph
 cast send 0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED \
---rpc-url <arb-sep-rpc-url> \
---private-key <private-key> #OR --account <account> \
+--rpc-url https://sepolia-rollup.arbitrum.io/rpc \
+--private-key <your-private-key> \
 "mint()"
+
+# Get token URI
+cast call 0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED \
+--rpc-url https://sepolia-rollup.arbitrum.io/rpc \
+"tokenURI(uint256)" <token-id>
+
+# Check ownership
+cast call 0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED \
+--rpc-url https://sepolia-rollup.arbitrum.io/rpc \
+"ownerOf(uint256)" <token-id>
 ```
+
+## 🎨 How It Works
+
+1. **User connects wallet** → Frontend auto-fetches all owned NFTs via Transfer events
+2. **User clicks mint** → Contract generates unique seed from block data + user address
+3. **Rust algorithm runs on-chain** → Generates deterministic SVG based on seed
+4. **SVG embedded in tokenURI** → Base64-encoded metadata stored on-chain
+5. **Frontend displays NFT** → Decodes and renders the SVG art
+
+## 🔗 Links
+
+- [Arbitrum Sepolia Faucet](https://faucet.quicknode.com/arbitrum/sepolia)
+- [Arbitrum Stylus Docs](https://docs.arbitrum.io/stylus/stylus-gentle-introduction)
+- [Contract Explorer](https://sepolia.arbiscan.io/address/0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED)

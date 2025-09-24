@@ -66,15 +66,22 @@ src/
 
 ### Contract Setup
 
-Update the contract configuration in `src/utils/contract.ts`:
+The contract is already configured for Arbitrum Sepolia in `src/utils/contract.ts`:
 
 ```typescript
 export const CONTRACT_CONFIG = {
-  address: "YOUR_DEPLOYED_CONTRACT_ADDRESS",
-  chainId: 42161, // Arbitrum One
-  testnetChainId: 421614, // Arbitrum Sepolia
+  address: "0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED",
+  chainId: 421614, // Arbitrum Sepolia
+  testnetChainId: 421614,
 };
 ```
+
+### Network Configuration
+
+- **Network:** Arbitrum Sepolia
+- **Chain ID:** 421614 (0x66eee)
+- **RPC URL:** https://sepolia-rollup.arbitrum.io/rpc
+- **Block Explorer:** https://sepolia.arbiscan.io
 
 ## 🎨 Features Overview
 
@@ -87,37 +94,65 @@ export const CONTRACT_CONFIG = {
 
 ### Minting Interface
 
-- Single-click minting
-- Loading states and progress indicators
-- Success/error feedback
-- Transaction status tracking
+- Single-click minting (free, gas only)
+- Real-time transaction tracking
+- Success feedback with token ID
+- Block explorer link after successful mint
+- Automatic token addition to gallery
+- Error handling with user-friendly messages
 
 ### Gallery View
 
-- Display owned Glyphs with SVG rendering
-- Token metadata parsing
-- Download SVG functionality
-- Responsive grid layout
+- **Auto-fetch on connect:** Automatically loads all user's NFTs
+- **Event-based indexing:** Uses Transfer events for efficient token discovery
+- **On-chain SVG rendering:** Decodes base64 metadata and displays SVG
+- **Download functionality:** Export SVG files locally
+- **Real-time updates:** New mints appear instantly
+- **Responsive grid layout:** Adapts to all screen sizes
 
 ## 🚀 Development
 
 ```bash
-# Start development server
+# Start development server (default: http://localhost:5173)
 npm run dev
 
 # Build for production
 npm run build
 
+# Preview production build
+npm run preview
+
 # Lint code
 npm run lint
 ```
 
-## 📝 Next Steps
+## 🔌 Network Requirements
 
-1. Replace mock functions with actual contract integration
-2. Deploy the smart contract and update contract address
-3. Test on Arbitrum Sepolia testnet
-4. Deploy to production on Arbitrum One
+### For Users
+1. Install MetaMask or compatible Web3 wallet
+2. Add Arbitrum Sepolia network (auto-prompts on connect)
+3. Get testnet ETH from [Arbitrum Sepolia Faucet](https://faucet.quicknode.com/arbitrum/sepolia)
+
+### Automatic Network Switching
+- App detects wrong network and prompts user to switch
+- One-click network switching to Arbitrum Sepolia
+- Network mismatch warnings displayed in UI
+
+## ✅ Integration Complete
+
+- ✅ Contract deployed on Arbitrum Sepolia
+- ✅ Wallet connection with auto network switching
+- ✅ Real minting with transaction tracking
+- ✅ Auto-fetch all user NFTs via Transfer events
+- ✅ On-chain SVG rendering and display
+- ✅ Download SVG functionality
+- ✅ Block explorer integration
+
+## 🐛 Known Limitations
+
+- Contract does not expose `totalSupply()` function (uses event-based fetching instead)
+- Transfer event queries may be slow with large token counts
+- Requires Arbitrum Sepolia testnet ETH for gas
 
 ## 📄 License
 
