@@ -1,0 +1,125 @@
+import { useState } from "react";
+import "./MintSection.css";
+
+interface MintSectionProps {
+  address: string;
+  onMintSuccess: (tokenId: string) => void;
+}
+
+function MintSection({ address, onMintSuccess }: MintSectionProps) {
+  const [isMinting, setIsMinting] = useState(false);
+  const [mintStatus, setMintStatus] = useState<
+    "idle" | "minting" | "success" | "error"
+  >("idle");
+
+  const handleMint = async () => {
+    setIsMinting(true);
+    setMintStatus("minting");
+
+    try {
+      // TODO: Implement actual contract interaction
+      // For now, simulate minting process
+      console.log("Minting Glyph for address:", address);
+
+      // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // Simulate successful mint
+      const mockTokenId = Math.floor(Math.random() * 1000).toString();
+      onMintSuccess(mockTokenId);
+      setMintStatus("success");
+
+      // Reset after 3 seconds
+      setTimeout(() => {
+        setMintStatus("idle");
+      }, 3000);
+    } catch (error) {
+      console.error("Minting failed:", error);
+      setMintStatus("error");
+
+      // Reset after 3 seconds
+      setTimeout(() => {
+        setMintStatus("idle");
+      }, 3000);
+    } finally {
+      setIsMinting(false);
+    }
+  };
+
+  return (
+    <section className="mint-section" id="mint">
+      <div className="mint-container">
+        <div className="mint-info">
+          <h2>🎨 Mint Your Unique Glyph</h2>
+          <p>
+            Each Glyph is generated entirely on-chain using a unique seed
+            derived from your address. No two Glyphs are the same!
+          </p>
+
+          <div className="mint-details">
+            <div className="detail-item">
+              <span className="detail-label">Price:</span>
+              <span className="detail-value">FREE</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Network:</span>
+              <span className="detail-value">Arbitrum One</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Generation:</span>
+              <span className="detail-value">100% On-Chain</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mint-action">
+          <div className="mint-preview">
+            <div className="preview-placeholder">
+              <span className="preview-icon">🎨</span>
+              <p>Your unique Glyph will appear here</p>
+            </div>
+          </div>
+
+          <button
+            className={`mint-btn ${mintStatus}`}
+            onClick={handleMint}
+            disabled={isMinting || mintStatus === "success"}
+          >
+            {mintStatus === "idle" && (
+              <>
+                <span className="btn-icon">✨</span>
+                Mint Glyph
+              </>
+            )}
+            {mintStatus === "minting" && (
+              <>
+                <span className="btn-spinner">⏳</span>
+                Minting...
+              </>
+            )}
+            {mintStatus === "success" && (
+              <>
+                <span className="btn-icon">✅</span>
+                Minted Successfully!
+              </>
+            )}
+            {mintStatus === "error" && (
+              <>
+                <span className="btn-icon">❌</span>
+                Mint Failed
+              </>
+            )}
+          </button>
+
+          {mintStatus === "success" && (
+            <p className="mint-success-text">
+              Your Glyph has been minted! Check the gallery below.
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default MintSection;
