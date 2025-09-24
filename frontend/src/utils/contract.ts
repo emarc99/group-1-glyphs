@@ -1,10 +1,7 @@
 // Contract configuration
 export const CONTRACT_CONFIG = {
-    // TODO: Replace with actual contract address after deployment
-    address: '0x0000000000000000000000000000000000000000',
-    // Arbitrum One Chain ID
-    chainId: 42161,
-    // Arbitrum Sepolia for testing
+    address: '0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED',
+    chainId: 421614,
     testnetChainId: 421614,
 } as const
 
@@ -49,6 +46,7 @@ export const NETWORKS = {
             symbol: 'ETH',
             decimals: 18,
         },
+        chainIdHex: '0x66eee',
     },
 } as const
 

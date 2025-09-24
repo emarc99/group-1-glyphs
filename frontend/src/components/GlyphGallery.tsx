@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import { CONTRACT_CONFIG, CONTRACT_ABI, parseTokenURI } from "../utils/contract";
 import "./GlyphGallery.css";
 
 interface GlyphGalleryProps {
@@ -47,21 +49,59 @@ function GlyphGallery({ userTokens }: GlyphGalleryProps) {
   };
 
   useEffect(() => {
-    // Simulate loading user's glyphs
     const loadGlyphs = async () => {
       setLoading(true);
 
-      // TODO: Replace with actual contract calls
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        if (!window.ethereum) {
+          console.error("No ethereum provider found");
+          setLoading(false);
+          return;
+        }
 
-      const mockGlyphs: MockGlyph[] = userTokens.map((tokenId) => ({
-        tokenId,
-        svg: generateMockSVG(tokenId),
-        name: `Glyph #${tokenId}`,
-      }));
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const contract = new ethers.Contract(
+          CONTRACT_CONFIG.address,
+          CONTRACT_ABI,
+          provider
+        );
 
-      setGlyphs(mockGlyphs);
-      setLoading(false);
+        const loadedGlyphs: MockGlyph[] = [];
+
+        for (const tokenId of userTokens) {
+          try {
+            const tokenURI = await contract.tokenURI(tokenId);
+            const metadata = parseTokenURI(tokenURI);
+
+            if (metadata) {
+              loadedGlyphs.push({
+                tokenId,
+                svg: metadata.svgData,
+                name: metadata.name || `Glyph #${tokenId}`,
+              });
+            } else {
+              loadedGlyphs.push({
+                tokenId,
+                svg: generateMockSVG(tokenId),
+                name: `Glyph #${tokenId}`,
+              });
+            }
+          } catch (error) {
+            console.error(`Error loading token ${tokenId}:`, error);
+            loadedGlyphs.push({
+              tokenId,
+              svg: generateMockSVG(tokenId),
+              name: `Glyph #${tokenId}`,
+            });
+          }
+        }
+
+        setGlyphs(loadedGlyphs);
+      } catch (error) {
+        console.error("Error loading glyphs:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadGlyphs();
@@ -126,7 +166,20 @@ function GlyphGallery({ userTokens }: GlyphGalleryProps) {
                     <span>👁️</span>
                     View Details
                   </button>
-                  <button className="action-btn download-btn">
+                  <button
+                    className="action-btn download-btn"
+                    onClick={() => {
+                      const blob = new Blob([glyph.svg], {
+                        type: "image/svg+xml",
+                      });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `glyph-${glyph.tokenId}.svg`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
                     <span>💾</span>
                     Download SVG
                   </button>

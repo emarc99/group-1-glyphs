@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ethers } from "ethers";
+import { CONTRACT_CONFIG, CONTRACT_ABI, getErrorMessage } from "../utils/contract";
 import "./MintSection.css";
 
 interface MintSectionProps {
@@ -6,7 +8,7 @@ interface MintSectionProps {
   onMintSuccess: (tokenId: string) => void;
 }
 
-function MintSection({ address, onMintSuccess }: MintSectionProps) {
+function MintSection({ onMintSuccess }: MintSectionProps) {
   const [isMinting, setIsMinting] = useState(false);
   const [mintStatus, setMintStatus] = useState<
     "idle" | "minting" | "success" | "error"
@@ -17,27 +19,52 @@ function MintSection({ address, onMintSuccess }: MintSectionProps) {
     setMintStatus("minting");
 
     try {
-      // TODO: Implement actual contract interaction
-      // For now, simulate minting process
-      console.log("Minting Glyph for address:", address);
+      if (!window.ethereum) {
+        throw new Error("Please install MetaMask to mint");
+      }
 
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        CONTRACT_CONFIG.address,
+        CONTRACT_ABI,
+        signer
+      );
 
-      // Simulate successful mint
-      const mockTokenId = Math.floor(Math.random() * 1000).toString();
-      onMintSuccess(mockTokenId);
+      const tx = await contract.mint();
+      console.log("Transaction sent:", tx.hash);
+
+      const receipt = await tx.wait();
+      console.log("Transaction confirmed:", receipt);
+
+      const transferEvent = receipt.logs.find(
+        (log: any) => {
+          try {
+            const parsed = contract.interface.parseLog(log);
+            return parsed?.name === "Transfer";
+          } catch {
+            return false;
+          }
+        }
+      );
+
+      let tokenId = "0";
+      if (transferEvent) {
+        const parsed = contract.interface.parseLog(transferEvent);
+        tokenId = parsed?.args.tokenId.toString() || "0";
+      }
+
+      onMintSuccess(tokenId);
       setMintStatus("success");
 
-      // Reset after 3 seconds
       setTimeout(() => {
         setMintStatus("idle");
       }, 3000);
     } catch (error) {
       console.error("Minting failed:", error);
+      alert(getErrorMessage(error));
       setMintStatus("error");
 
-      // Reset after 3 seconds
       setTimeout(() => {
         setMintStatus("idle");
       }, 3000);
@@ -63,7 +90,7 @@ function MintSection({ address, onMintSuccess }: MintSectionProps) {
             </div>
             <div className="detail-item">
               <span className="detail-label">Network:</span>
-              <span className="detail-value">Arbitrum One</span>
+              <span className="detail-value">Arbitrum Sepolia</span>
             </div>
             <div className="detail-item">
               <span className="detail-label">Generation:</span>

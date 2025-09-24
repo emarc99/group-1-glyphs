@@ -7,7 +7,7 @@ import MintSection from "./components/MintSection";
 import { useWallet } from "./hooks/useWallet";
 
 function App() {
-  const { address, isConnected, connect, disconnect } = useWallet();
+  const { address, isConnected, chainId, connect, disconnect, switchToArbitrum } = useWallet();
   const [userTokens, setUserTokens] = useState<string[]>([]);
 
   return (
@@ -23,8 +23,10 @@ function App() {
         <WalletConnect
           isConnected={isConnected}
           address={address}
+          chainId={chainId}
           onConnect={connect}
           onDisconnect={disconnect}
+          onSwitchNetwork={switchToArbitrum}
         />
 
         {isConnected && (
