@@ -90,3 +90,14 @@ svg-glyph/
 ├── .gitignore
 └── README.md
 ```
+
+## 📊 Interacting with the Contract
+
+### Using Cast (Foundry)
+
+```sh
+cast send 0x549Dd9B51380d0884A89Ed97ddDfFeB19b3919ED \
+--rpc-url <arb-sep-rpc-url> \
+--private-key <private-key> #OR --account <account> \
+"mint()"
+```
