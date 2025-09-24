@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ethers } from "ethers";
-import { CONTRACT_CONFIG, CONTRACT_ABI, getErrorMessage } from "../utils/contract";
+import { CONTRACT_CONFIG, CONTRACT_ABI, getErrorMessage, NETWORKS } from "../utils/contract";
 import "./MintSection.css";
 
 interface MintSectionProps {
@@ -13,6 +13,8 @@ function MintSection({ onMintSuccess }: MintSectionProps) {
   const [mintStatus, setMintStatus] = useState<
     "idle" | "minting" | "success" | "error"
   >("idle");
+  const [txHash, setTxHash] = useState<string>("");
+  const [mintedTokenId, setMintedTokenId] = useState<string>("");
 
   const handleMint = async () => {
     setIsMinting(true);
@@ -33,6 +35,7 @@ function MintSection({ onMintSuccess }: MintSectionProps) {
 
       const tx = await contract.mint();
       console.log("Transaction sent:", tx.hash);
+      setTxHash(tx.hash);
 
       const receipt = await tx.wait();
       console.log("Transaction confirmed:", receipt);
@@ -54,12 +57,15 @@ function MintSection({ onMintSuccess }: MintSectionProps) {
         tokenId = parsed?.args.tokenId.toString() || "0";
       }
 
+      setMintedTokenId(tokenId);
       onMintSuccess(tokenId);
       setMintStatus("success");
 
       setTimeout(() => {
         setMintStatus("idle");
-      }, 3000);
+        setTxHash("");
+        setMintedTokenId("");
+      }, 10000);
     } catch (error) {
       console.error("Minting failed:", error);
       alert(getErrorMessage(error));
@@ -138,10 +144,27 @@ function MintSection({ onMintSuccess }: MintSectionProps) {
             )}
           </button>
 
-          {mintStatus === "success" && (
-            <p className="mint-success-text">
-              Your Glyph has been minted! Check the gallery below.
-            </p>
+          {mintStatus === "success" && txHash && (
+            <div className="mint-success-text" style={{ marginTop: '16px' }}>
+              <p>✅ Your Glyph has been minted! Token ID: #{mintedTokenId}</p>
+              <a
+                href={`${NETWORKS.arbitrumSepolia.blockExplorer}/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: '#4ecdc4',
+                  textDecoration: 'underline',
+                  fontSize: '14px',
+                  display: 'block',
+                  marginTop: '8px'
+                }}
+              >
+                View on Arbiscan →
+              </a>
+              <p style={{ fontSize: '14px', marginTop: '8px', color: '#888' }}>
+                Check the gallery below for your Glyph
+              </p>
+            </div>
           )}
         </div>
       </div>
