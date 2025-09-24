@@ -16,7 +16,6 @@ export const CONTRACT_ABI = [
 
     // Custom functions
     'function mint() payable returns (uint256)',
-    'function totalSupply() view returns (uint256)',
 
     // Events
     'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
@@ -115,4 +114,52 @@ export function getErrorMessage(error: any): string {
     }
 
     return 'An unknown error occurred'
+}
+
+// Fetch all token IDs owned by a user using Transfer events
+export async function fetchUserTokens(userAddress: string, provider: any): Promise<string[]> {
+    try {
+        const { ethers } = await import('ethers')
+        const contract = new ethers.Contract(
+            CONTRACT_CONFIG.address,
+            CONTRACT_ABI,
+            provider
+        )
+
+        console.log('Fetching Transfer events for user:', userAddress)
+
+        // Query all Transfer events where 'to' is the user address
+        const filter = contract.filters.Transfer(null, userAddress)
+        const events = await contract.queryFilter(filter, 0, 'latest')
+
+        console.log('Transfer events found:', events.length)
+
+        const userTokens: string[] = []
+        const tokenSet = new Set<string>()
+
+        // Check each token to see if user still owns it
+        for (const event of events) {
+            if ('args' in event) {
+                const tokenId = event.args?.tokenId?.toString()
+                if (tokenId && !tokenSet.has(tokenId)) {
+                    try {
+                        const owner = await contract.ownerOf(tokenId)
+                        console.log(`Token ${tokenId} owner:`, owner)
+                        if (owner.toLowerCase() === userAddress.toLowerCase()) {
+                            userTokens.push(tokenId)
+                            tokenSet.add(tokenId)
+                        }
+                    } catch (error) {
+                        console.error(`Error checking token ${tokenId}:`, error)
+                    }
+                }
+            }
+        }
+
+        console.log('User tokens found:', userTokens)
+        return userTokens.sort((a, b) => Number(a) - Number(b))
+    } catch (error) {
+        console.error('Error fetching user tokens:', error)
+        return []
+    }
 }
