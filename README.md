@@ -22,6 +22,12 @@ This approach demonstrates the high performance and low cost of Stylus, which ma
 
 ---
 
+## Contributors
+
+- [AbdulSalam Baruwa](https://github.com/dmystical-coder)
+- [David Dada](https://github.com/dadadave80)
+- [Emmanuel Aroso](https://github.com/emarc99)
+
 ## 🛠️ Tech Stack
 
 * **Blockchain:** [Arbitrum Sepolia](https://arbitrum.io/) (Testnet)
